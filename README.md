@@ -1,3 +1,11 @@
 # projet_mastermind
-projet mastermind : Maud Guidoni, Ines Bel-Hadj, Lima Pinto Jessica
-vdsv
+
+####################
+# sujet : puissance 3
+# groupe_3_BI_TD2  
+# menbres du goupe : Maud Guidoni, Ines Bel-Hadj, Jessica Lima Pinto
+####################
+
+
+
+
