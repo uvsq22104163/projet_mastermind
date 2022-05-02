@@ -17,19 +17,34 @@ import random as rd
 #######################
 # définition des constantes
 
+#constantes code
+#choix des couleurs
+code_couleur = [ "null", "blue", "green", "yellow", "magenta", "red", "brown", "black", "pink"]
 # longueur du code
 lg_code = 4
 # nombre de couleur
-nb_couleur =6
+nb_couleur = 8
+#nombre d'essai
+essai = 0
+#nombre de coup
+nb_coup = 10
+
+#constantes du canvas
 # Hauteur du canvas
 HAUTEUR = 500
 # Largeur du canvas
 LARGEUR = 300
+
+#conctantes des cercles
+#taille des cerles
 taille_cercle = 30
+#espaces entre les cercles
 espace_cercle = 5
-essai = 0
-nb_coup = 10
-code_couleur = [ "null", "blue", "green", "yellow", "magenta", "red"]
+
+
+
+
+
 
 
 
@@ -41,8 +56,18 @@ couleur1_var = IntVar()
 couleur2_var = IntVar()
 couleur3_var = IntVar()
 couleur4_var = IntVar()
+couleur1_var.set('')
+couleur2_var.set('')
+couleur3_var.set('')
+couleur4_var.set('')
 
 
+#######################
+# generation du code
+code_random = []
+for i in range(0, lg_code) :
+    code_random.extend([rd.randint(1, nb_couleur)])
+print(code_random)
 
 #######################
 # fonctions
@@ -53,28 +78,61 @@ def choisir_couleur() :
     code_a_tester=[ couleur1_var.get(),couleur2_var.get(), couleur3_var.get(), couleur4_var.get()]
     for i in range (0, lg_code) :
         cercle_code(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), code_a_tester[i])
+    couleur1_var.set('')
+    couleur2_var.set('')
+    couleur3_var.set('')
+    couleur4_var.set('')
+    
     # cacul de la verfication
-
+    place_exact, place_similaire = verif_code(code_a_tester, code_random)
+    print("Place exacte    : ",place_exact)
+    print("Place similaire : ",place_similaire)
     # affichage verification
-
+    for i in range (0, place_exact+place_similaire) :
+        if i < place_exact :
+            cercle_verif(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), "black")
+        else :
+            cercle_verif(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), "white")
     # fin de partie gagnée
     
     
     
     essai = essai + 1 
     # fin de partie perdue
-    print(code_a_tester)
+
+    # fin de fonction
+
+    
+# cacul de la verfication
+
+def verif_code(c_test, c_orig) :
+    nb_exact =0 
+    nb_similaire = 0
+    # recherche des exacts en remplacant par zero
+    for i in range (len(c_test)) :
+        for j in range (len(c_orig)) :
+            if i == j and c_test[i] == c_orig[j] :
+                nb_exact = nb_exact + 1
+                c_orig[j] = 0
+                c_test[i] = 0
+    # recherche des similaires differents de zero
+    for i in range (len(c_test)) :
+        for j in range (len(c_orig)) :        
+            if i != j and c_test[i] == c_orig[j] and c_test[i] != 0 :
+                nb_similaire = nb_similaire + 1  
+                c_orig[j] = 0
+                c_test[i] = 0    
+    return nb_exact, nb_similaire
+
+    
+
+
 
 #######################
 # programmme principale
 
 
-#######################
-# generation du code
-code_random = []
-for i in range(0, lg_code) :
-    code_random.extend([rd.randint(1, nb_couleur)])
-print(code_random)
+
 
 # cercle affichage code
 def cercle_code(x, y, c) :
@@ -82,7 +140,7 @@ def cercle_code(x, y, c) :
 
 # cercle affichage verification
 def cercle_verif(x, y, c) :
-    canvas2.create_oval((x, y), (x+taille_cercle, y+taille_cercle), fill = code_couleur[c])
+    canvas2.create_oval((x, y), (x+taille_cercle, y+taille_cercle), fill = c)
 
 # définiton des widgets
 
@@ -97,10 +155,10 @@ bouton_1joueur = Button(root, text = "jeu 1 joueur")
 bouton_2joueur = Button(root, text = "jeu 2 joueurs")
 bouton_sauv = Button(root, text = "sauvegarder")
 bouton_arriere = Button(root, text = "revenir en arrière")
-saisie_couleur1 = Entry(root, textvariable=couleur1_var, width = 1)
-saisie_couleur2 = Entry(root, textvariable=couleur2_var, width = 1)
-saisie_couleur3 = Entry(root, textvariable=couleur3_var, width = 1)
-saisie_couleur4 = Entry(root, textvariable=couleur4_var, width = 1)
+saisie_couleur1 = Entry(root, textvariable=couleur1_var, width = 3)
+saisie_couleur2 = Entry(root, textvariable=couleur2_var, width = 3)
+saisie_couleur3 = Entry(root, textvariable=couleur3_var, width = 3)
+saisie_couleur4 = Entry(root, textvariable=couleur4_var, width = 3)
 bouton_soumettre = Button(root, text='Soumettre', command=choisir_couleur)
 
 # emplacement des widgets
