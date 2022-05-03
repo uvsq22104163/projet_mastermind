@@ -1,7 +1,7 @@
 # projet_mastermind
 
 ####################
-# sujet : puissance 3
+# sujet : mastermind
 # groupe_3_BI_TD2  
 # menbres du goupe : Maud Guidoni, Ines Bel-Hadj, Jessica Lima Pinto
 # https://github.com/uvsq22104163/projet_mastermind
@@ -41,17 +41,7 @@ taille_cercle = 30
 #espaces entre les cercles
 espace_cercle = 5
 
-
-
-
-
-
-
-
-root = Tk()
-
-root.title("Mastermind")
-
+#variables 
 couleur1_var = IntVar()
 couleur2_var = IntVar()
 couleur3_var = IntVar()
@@ -71,6 +61,7 @@ print(code_random)
 
 #######################
 # fonctions
+# fonction pour que chaque valeurs de la liste ce transforme en ronds de couleurs 
 def choisir_couleur() :
     # control partie en cours
     
@@ -124,16 +115,6 @@ def verif_code(c_test, c_orig) :
                 c_test[i] = 0    
     return nb_exact, nb_similaire
 
-    
-
-
-
-#######################
-# programmme principale
-
-
-
-
 # cercle affichage code
 def cercle_code(x, y, c) :
     canvas.create_oval((x, y), (x+taille_cercle, y+taille_cercle), fill = code_couleur[c])
@@ -142,11 +123,14 @@ def cercle_code(x, y, c) :
 def cercle_verif(x, y, c) :
     canvas2.create_oval((x, y), (x+taille_cercle, y+taille_cercle), fill = c)
 
+#######################
+# programmme principale
+
+root = Tk()
+
+root.title("Mastermind")
+
 # définiton des widgets
-
-
-
-
 
 canvas = Canvas(root, width= LARGEUR, height= HAUTEUR, bg = "white")
 canvas2 = Canvas(root, width= LARGEUR, height= HAUTEUR, bg = "white")
@@ -175,7 +159,6 @@ saisie_couleur2.grid(row = 12, column=2)
 saisie_couleur3.grid(row = 12, column=3)
 saisie_couleur4.grid(row = 12, column=4)
 bouton_soumettre.grid (row = 12, column=5)
-
 
 # boucle principale
 
