@@ -55,6 +55,7 @@ root = Tk()
 
 root.title("Mastermind")
 
+# variables pour les widgets label et entry
 couleur1_var = IntVar()
 couleur2_var = IntVar()
 couleur3_var = IntVar()
@@ -68,8 +69,8 @@ resultats_var = StringVar()
 
 # fonction pour que chaque valeurs de la liste ce transforme en ronds de couleurs 
 def choisir_couleur() :
-    # assimilation des numeros en listes
     global essai
+    # assimilation des numeros en listes
     code_a_tester=[couleur1_var.get(),couleur2_var.get(), couleur3_var.get(), couleur4_var.get()]
     
     # verification de la saisie dans les codes couleurs(impossible de mettre 0)
@@ -89,7 +90,7 @@ def choisir_couleur() :
     print("Place exacte    : ",place_exact)
     print("Place similaire : ",place_similaire)
     print("Essai           : ",essai)
-    # affichage verification, 
+    # affichage verification (rond noir/blanc). les ronds noirs sont placés en premier 
     for i in range (0, place_exact+place_similaire) :
         if i < place_exact :
             cercle_verif(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), "black")
@@ -123,6 +124,7 @@ def verif_code(c_test, c_orig) :
     # recherche des exacts en remplacant par zero
     for i in range (len(c_test)) :
         for j in range (len(c_orig)) :
+            # détection des couleurs avec une coincidence exacte et mise à zero des couleurs indentiques
             if i == j and c_test[i] == c_orig[j] :
                 nb_exact = nb_exact + 1
                 c_orig[j] = 0
@@ -130,6 +132,7 @@ def verif_code(c_test, c_orig) :
     # recherche des similaires differents de zero
     for i in range (len(c_test)) :
         for j in range (len(c_orig)) : 
+            # détection des couleurs avec une coincidence sinmilaire, en evitant les zero et mise à zero des couleurs correspondantes
             if i != j and c_test[i] == c_orig[j] and c_test[i] != 0 :
                 nb_similaire = nb_similaire + 1 
                 c_orig[j] == 0 
@@ -190,7 +193,7 @@ def partie_2_joueurs() :
     bouton_soumettre['state'] = NORMAL
     # le bouton aide est desactivé
     bouton_aide['state'] = DISABLED
-    #les aisies sont activées 
+    #les saisies sont activées 
     etat_saisie_couleur(NORMAL)
     # le bouton soumettre est affecter à la fonction choisir couleur
     bouton_soumettre['command'] = saisie_code_j2
@@ -216,7 +219,7 @@ def fin_partie() :
     # les boutons et les saisies sont desactivés
     bouton_soumettre['state'] = DISABLED
     bouton_aide['state'] = DISABLED
-    # les cercles sont effacés
+    # affichage du code à trouver
     for i in range (0, lg_code) :
         cercle_saisi(i*(taille_cercle+espace_cercle), 5, code_random[i])
     etat_saisie_couleur(DISABLED)
@@ -236,14 +239,16 @@ def raz_zones_saisies() :
     couleur3_var.set('')
     couleur4_var.set('')
 
-# controle de saisie avec impossibiliter de mettre 0 et au dessus de 8, si maivaise saisie : affichage erreur de saisie 
+# controle de saisie avec impossibilite de mettre 0 et au dessus de 8 
 def control_de_saisie(code_a_verifier) :
     codevalide = 1
     for i in range (0, lg_code) :
         if code_a_verifier[i] < 1 or code_a_verifier[i] > 8 :
             codevalide = 0
+    # problème de syntaxe alors message d'erreur
     if codevalide == 0 :
             resultats_var.set("Erreur de saisie")
+    # sinon aucun message
     else :
         resultats_var.set('')
     return codevalide
@@ -251,35 +256,47 @@ def control_de_saisie(code_a_verifier) :
 # aide pour le joueur
 def aide() :
     temoin_unique = 0
+    # la boucle continue si le code d'aide n'est pas unique par rapport aux codes déjà saisis et aux résultats de verification déjà existants
     while temoin_unique == 0 :
         code_test = []
+        # génration du code d'aide (random)
         for i in range(0, lg_code) :
             code_test.extend([rd.randint(1, nb_couleur)])
         temoin_unique = 1
+        # recherche du code d'aide dans les codes déjà saisis
         for i in range(0, len(list_essais)) :
             if code_test == list_essais[i] :
                 temoin_unique = 0
+        # cette boucle va chercher les valeurs de vérification du code d'aide dans les vérification déjà effectuées
         for i in range(0, len(list_verification)):
             place_exact, place_similaire = verif_code(list(code_test), list(code_random))
             [tempvar1 , tempvar2 ] = list_verification[i]
-            #if [place_exact, place_similaire] == list_verification[i] :
+            # la ligne en dessous permet de tester en plus les ronds blanc
+            #####if [place_exact, place_similaire] == list_verification[i] :
+            # controle que la vérification du code d'aide ne donne pas une vérification exacte déjà trouvée par les essais de l'utilisateur
             if place_exact == tempvar1 :
                 temoin_unique = 0
+    # ajouter les valeurs de l'aide dans les zones de saisie
     couleur1_var.set(code_test[0])
     couleur2_var.set(code_test[1])
     couleur3_var.set(code_test[2])
     couleur4_var.set(code_test[3])
 
+# revenir en arrière
 def defaire() :
     global essai
+    # boucle qui permet de revenir en arriere jusqu'à l'essai 0
     if len(objects1) > 0 :
+        # effacement des 4 ronds de couleur
         for i in range(0, lg_code) :
             canvas.delete(objects1[-1])
             del(objects1[-1])
         place_exact, place_similaire = list_verification[-1]
+        # effacement des possible ronds noir/blanc
         for i in range(0,  place_exact+place_similaire) :
             canvas2.delete(objects2[-1])
             del(objects2[-1])
+        # effacement des dernières valeurs des listes et enleve un essai
         del(list_essais[-1])
         del(list_verification[-1])
         essai -= 1
@@ -304,15 +321,16 @@ bouton_2joueur = Button(root, text = "jeu 2 joueurs", command= partie_2_joueurs)
 bouton_sauv = Button(root, text = "sauvegarder")
 bouton_recharger = Button(root, text = "recharger")
 bouton_arriere = Button(root, text = "revenir en arrière", command=defaire)
+bouton_soumettre = Button(root, text='Soumettre', command=choisir_couleur, state= DISABLED)
+bouton_aide = Button(root, text='aide', command=aide, state= DISABLED)
 
 # la fonction entry vient d'internet ( zone de saisie)
 saisie_couleur1 = Entry(root, textvariable=couleur1_var, width = 3, state= DISABLED)
 saisie_couleur2 = Entry(root, textvariable=couleur2_var, width = 3, state= DISABLED)
 saisie_couleur3 = Entry(root, textvariable=couleur3_var, width = 3, state= DISABLED)
 saisie_couleur4 = Entry(root, textvariable=couleur4_var, width = 3, state= DISABLED)
-bouton_soumettre = Button(root, text='Soumettre', command=choisir_couleur, state= DISABLED)
-bouton_aide = Button(root, text='aide', command=aide, state= DISABLED)
-# la fonction entry vient d'internet ( zone de texte)
+
+# la fonction label vient d'internet ( zone de texte)
 resultats = Label(textvariable = resultats_var )
 regles = Label(text = "code couleur :""\n""\n1 = bleu\n2 = vert\n3 = jaune\n4 = violet\n5 = rouge\n6 = orange\n7 = gris\n8 = rose""\n""\n""rond noir = bien placé""\n""rond blanc = mal placé ")
 
