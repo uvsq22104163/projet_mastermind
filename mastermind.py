@@ -22,6 +22,8 @@ import random as rd
 code_couleur = [ "null", "blue", "green", "yellow", "purple", "red", "orange", "grey", "pink"]
 # longueur du code
 lg_code = 4
+# longueur du resultat de verification
+lg_verifi = 2
 # nombre de couleur
 nb_couleur = 8
 #nombre d'essai
@@ -105,6 +107,8 @@ def choisir_couleur() :
     print("liste verification : ",list_verification)
     # nombre d'essai
     essai = essai + 1 
+    if essai > 0 :
+        bouton_arriere['state'] = NORMAL
 
     # fin de partie gagnée
     if place_exact == 4 :
@@ -161,6 +165,7 @@ def initialisation() :
     canvas.delete("all")
     canvas2.delete("all")
     canvas3.delete("all")
+    bouton_sauv['state'] = DISABLED
     resultats_var.set('')
     raz_zones_saisies()
     global list_essais, list_verification
@@ -168,6 +173,8 @@ def initialisation() :
     list_verification = []
     global essai 
     essai = 0
+    global code_random
+    code_random = []
 
 # partie un joueur avec le code genere au hasard 
 def partie_1_joueur() :
@@ -184,6 +191,7 @@ def partie_1_joueur() :
     for i in range(0, lg_code) :
         code_random.extend([rd.randint(1, nb_couleur)])
     print("code genere : ",code_random)
+    bouton_sauv['state'] = NORMAL
 
 # partie à deux joeurs avec le premier joueur qui tape son code et l'autre qui joue
 def partie_2_joueurs() :
@@ -209,6 +217,7 @@ def saisie_code_j2() :
     print("code saisi : ",code_random)
     # le bouton aide devient accessible
     bouton_aide['state'] = NORMAL
+    bouton_sauv['state'] = NORMAL
     # effacement des zones de saisie
     raz_zones_saisies()
     # le bouton soumettre est affecter à la fonction choisir couleur
@@ -219,6 +228,8 @@ def fin_partie() :
     # les boutons et les saisies sont desactivés
     bouton_soumettre['state'] = DISABLED
     bouton_aide['state'] = DISABLED
+    bouton_arriere['state'] = DISABLED
+    bouton_sauv['state'] = DISABLED
     # affichage du code à trouver
     for i in range (0, lg_code) :
         cercle_saisi(i*(taille_cercle+espace_cercle), 5, code_random[i])
@@ -300,8 +311,68 @@ def defaire() :
         del(list_essais[-1])
         del(list_verification[-1])
         essai -= 1
+    if essai < 1 :
+        bouton_arriere['state'] = DISABLED
 
+# sauvegarde
+def sauvegarde() :
+    fic = open("sauvegarde", "w")
+    for valeur in code_random :
+            fic.write(str(valeur)+",")
+    fic.write("\n")
+    for i in range(0, len(list_essais)) :
+        for valeur in list_essais[i] :
+            fic.write(str(valeur)+",")
+        fic.write("\n")
+        for valeur in list_verification[i] :
+            fic.write(str(valeur)+",")
+        fic.write("\n")
+    fic.close()
 
+def restauration() :
+    initialisation()
+    # accès au variables globales qui vont être reconfigurées par le rechargement
+    global essai, code_random, list_essais, list_verification
+    #les boutons et les saisies activés
+    bouton_soumettre['state'] = NORMAL
+    bouton_aide['state'] = NORMAL
+    etat_saisie_couleur(NORMAL)
+    # ouverture du fichier
+    fic = open("sauvegarde", "r")
+    # lecture de la première ligne : code à découvrir
+    line = fic.readline()
+    # supression du retour à la ligne
+    line = line.replace(",\n",'')
+    # conversion de la chaine de caractère avec séparateur ',' en liste
+    for valeur in line.split(',') :
+        code_random.extend([int(valeur)])
+    print ("code_random : ", code_random)
+    #boucle de lecture du reste du fichier
+    for line in fic:
+        list_tmp=[]
+        line = line.replace(",\n",'')
+        for  valeur in line.split(',') :
+            list_tmp.extend([int(valeur)])
+        # affichage des essais
+        if len(list_tmp) == lg_code :
+            list_essais.append(list_tmp)
+            for i in range (0, lg_code) :
+                cercle_code(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), list_tmp[i])           
+        # affichage des résultats des vérifications
+        else :
+            list_verification.append(list_tmp)
+            for i in range (0, list_tmp[0]+list_tmp[1]) :
+                if i < list_tmp[0] :
+                    cercle_verif(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), "black")
+                else :
+                    cercle_verif(i*(taille_cercle+espace_cercle), taille_cercle+essai*(taille_cercle+espace_cercle), "white")
+            essai += 1
+    if essai > 0 :
+        bouton_arriere['state'] = NORMAL
+    bouton_sauv['state'] = NORMAL
+    print("liste essais : ",list_essais)
+    print("liste verification : ",list_verification)
+    fic.close()
 
 #######################
 # programmme principale
@@ -318,9 +389,9 @@ canvas3 = Canvas(root, width= LARGEUR, height= 50, bg = "white")
 
 bouton_1joueur = Button(root, text = "jeu 1 joueur", command= partie_1_joueur)
 bouton_2joueur = Button(root, text = "jeu 2 joueurs", command= partie_2_joueurs)
-bouton_sauv = Button(root, text = "sauvegarder")
-bouton_recharger = Button(root, text = "recharger")
-bouton_arriere = Button(root, text = "revenir en arrière", command=defaire)
+bouton_sauv = Button(root, text = "sauvegarder", command=sauvegarde, state= DISABLED)
+bouton_recharger = Button(root, text = "recharger", command=restauration)
+bouton_arriere = Button(root, text = "revenir en arrière", command=defaire, state= DISABLED)
 bouton_soumettre = Button(root, text='Soumettre', command=choisir_couleur, state= DISABLED)
 bouton_aide = Button(root, text='aide', command=aide, state= DISABLED)
 
